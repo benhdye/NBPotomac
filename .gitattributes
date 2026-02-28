@@ -1,0 +1,4 @@
+*.csv filter=lfs diff=lfs merge=lfs -text
+CSVs/flows_Barnum_15min.csv !text !filter !merge !diff
+CSVs/flows_Barton_15min.csv !text !filter !merge !diff
+CSVs/flows_Kitzmiller_15min.csv !text !filter !merge !diff
