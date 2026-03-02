@@ -91,3 +91,50 @@ p <- ggplot(flows_all,
  
  grid.arrange(p1, p2, p3, ncol = 1)
  
+ #Set y-axis same for all
+ 
+ y_max <- max(
+   flows_Kitzmiller$Flow_Inst,
+   flows_Barnum$Flow_Inst,
+   flows_Barton$Flow_Inst,
+   na.rm = TRUE
+ )
+ 
+ y_min <- min(
+   flows_Kitzmiller$Flow_Inst,
+   flows_Barnum$Flow_Inst,
+   flows_Barton$Flow_Inst,
+   na.rm = TRUE
+ )
+ 
+ coord_cartesian(ylim = c(y_min, y_max))
+ 
+ p1 <- ggplot(flows_Kitzmiller,
+              aes(x = dateTime, y = Flow_Inst)) +
+   geom_line(color = colors["Kitzmiller"], linewidth = 0.6) +
+   coord_cartesian(ylim = c(y_min, y_max)) +
+   labs(title = "Kitzmiller",
+        x = NULL,
+        y = "Discharge (CFS)") +
+   theme_minimal()
+ 
+ p2 <- ggplot(flows_Barnum,
+              aes(x = dateTime, y = Flow_Inst)) +
+   geom_line(color = colors["Barnum"], linewidth = 0.6) +
+   coord_cartesian(ylim = c(y_min, y_max)) +
+   labs(title = "Barnum",
+        x = NULL,
+        y = "Discharge (CFS)") +
+   theme_minimal()
+ 
+ p3 <- ggplot(flows_Barton,
+              aes(x = dateTime, y = Flow_Inst)) +
+   geom_line(color = colors["Barton"], linewidth = 0.6) +
+   coord_cartesian(ylim = c(y_min, y_max)) +
+   labs(title = "Barton",
+        x = "Time",
+        y = "Discharge (CFS)") +
+   theme_minimal()
+ 
+ grid.arrange(p1, p2, p3, ncol = 1)
+ 
