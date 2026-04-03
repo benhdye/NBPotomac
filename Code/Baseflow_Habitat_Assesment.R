@@ -199,3 +199,18 @@ ggplot(winter_yearly_summary,
   theme_minimal()
 
 
+ggplot(winter_yearly_summary,
+       aes(x = Winter_Year,
+           y = Site,
+           fill = Percent)) +
+  geom_tile() +
+  facet_wrap(~ Habitat_Class) +
+  scale_fill_viridis_c() +
+  labs(
+    x = "Winter Year",
+    y = "",
+    title = "Winter Habitat Class Percentage Heatmap"
+  ) +
+  theme_minimal()
+
+

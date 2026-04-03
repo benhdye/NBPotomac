@@ -37,3 +37,32 @@ write.csv(flows_Kitzmiller, "flows_Kitzmiller.csv", row.names = FALSE)
 write.csv(flows_Barton, "flows_Barton.csv", row.names = FALSE)
 
 write.csv(flows_Barnum, "flows_Barnum.csv", row.names = FALSE)
+
+#pullintervaldata(daily values)
+flows_Kitzmiller_daily<-readNWISdv(
+  siteNumbers="01595500",
+  parameterCd="00060",
+  startDate="2003-10-01",
+  endDate="2025-09-17"
+)
+
+flows_Barnum_daily<-readNWISdv(
+  siteNumbers="01595800",
+  parameterCd="00060",
+  startDate="2003-10-01",
+  endDate="2025-09-17"
+)
+
+flows_Barton_daily<-readNWISdv(
+  siteNumbers="01596500",
+  parameterCd="00060",
+  startDate="2003-10-01",
+  endDate="2025-09-17"
+)
+
+#write as .csv files
+write.csv(flows_Kitzmiller_daily, "flows_Kitzmiller_daily.csv", row.names = FALSE)
+
+write.csv(flows_Barton_daily, "flows_Barton_daily.csv", row.names = FALSE)
+
+write.csv(flows_Barnum_daily, "flows_Barnum_daily.csv", row.names = FALSE)
