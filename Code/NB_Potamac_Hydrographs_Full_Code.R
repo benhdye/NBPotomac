@@ -628,7 +628,7 @@ plot_slice_norm <- function(site_name, flow_min, flow_max, pt_color = "black") {
 }
 
 plot_kitzmiller <- plot_slice_norm("Kitzmiller", 253.760, 1691.73, "blue") +
-  coord_cartesian(ylim = c(0, 10))
+  coord_cartesian(ylim = c(0, 2))
 
 plot_barnum <- plot_slice_norm("Barnum", 300, 2000, "red") +
   coord_cartesian(ylim = c(0, 2))
@@ -710,5 +710,172 @@ ggplot(
     color = "Site"
   )
 
+# --- Spawning Season Analysis (Mid-Oct to Mid-Nov) ---
 
+# Filter for spawning window: Oct 15 – Nov 15
+spawning_excursions <- excursions_10pct %>%
+  mutate(dateTime = parse_date_time(dateTime,
+                                    orders = c("ymd HMS", "ymd"),
+                                    tz = "UTC")) %>%
+  filter(
+    (month(dateTime) == 10 & day(dateTime) >= 15) |
+      (month(dateTime) == 11 & day(dateTime) <= 15)
+  )
 
+# --- PDF of Fractional Change During Spawning Season ---
+ggplot(
+  spawning_excursions %>%
+    filter(site %in% c("Kitzmiller", "Barnum", "Barton")),
+  aes(x = frac_change, color = site, fill = site)
+) +
+  geom_density(alpha = 0.25) +
+  geom_vline(xintercept = 0.10, linetype = "dashed") +
+  scale_x_log10() +
+  theme_minimal() +
+  labs(
+    x = "Fractional Change (>10%)",
+    y = "Density",
+    title = "PDF of Fractional Flow Increases During Spawning Season (Oct 15 – Nov 15)",
+    color = "Site",
+    fill = "Site"
+  )
+
+# --- CDF of Fractional Change During Spawning Season (Linear) ---
+ggplot(
+  spawning_excursions %>%
+    filter(site %in% c("Kitzmiller", "Barnum", "Barton")),
+  aes(x = frac_change, color = site)
+) +
+  stat_ecdf(size = 1) +
+  coord_cartesian(xlim = c(0, 1)) +
+  theme_minimal() +
+  labs(
+    x = "Fractional Change (>10%)",
+    y = "Cumulative Probability",
+    title = "CDF of Fractional Flow Increases During Spawning Season (Oct 15 – Nov 15)",
+    color = "Site"
+  )
+
+# --- CDF of Fractional Change During Spawning Season (Log Scale) ---
+ggplot(
+  spawning_excursions %>%
+    filter(site %in% c("Kitzmiller", "Barnum", "Barton")),
+  aes(x = frac_change, color = site)
+) +
+  stat_ecdf(size = 1) +
+  scale_x_log10() +
+  theme_minimal() +
+  labs(
+    x = "Fractional Change (>10%) (log scale)",
+    y = "Cumulative Probability",
+    title = "Log-Scale CDF of Fractional Flow Increases During Spawning Season (Oct 15 – Nov 15)",
+    color = "Site"
+  )
+
+# --- Quick summary of spawning excursion counts per site ---
+spawning_excursions %>%
+  group_by(site) %>%
+  summarise(
+    n = n(),
+    median_frac_change = median(frac_change, na.rm = TRUE),
+    q90_frac_change    = quantile(frac_change, 0.90, na.rm = TRUE)
+  )
+
+#scatter plot with translucent points below 10% threshold
+flow_all_15min <- flow_all_15min %>%
+  mutate(above_10pct = factor(
+    ifelse(is.na(frac_change) | frac_change <= 0.10, "FALSE", "TRUE"),
+    levels = c("FALSE", "TRUE")
+  ))
+
+# Scatterplot with Translucent Points Below
+site_colors <- c(
+  "Kitzmiller" = "#6495ED", 
+  "Barnum"     = "#B23A48",  
+  "Barton"     = "#5E8C61"   
+)
+
+ggplot() +
+  geom_point(
+    data = flow_all_15min %>% filter(flow_diff > 0, Flow_Inst > 0, above_10pct == "FALSE"),
+    aes(x = Flow_Inst, y = flow_diff, color = site),
+    size = 0.8, alpha = 0.03
+  ) +
+  geom_point(
+    data = flow_all_15min %>% filter(flow_diff > 0, Flow_Inst > 0, above_10pct == "TRUE"),
+    aes(x = Flow_Inst, y = flow_diff, color = site),
+    size = 0.8, alpha = 0.6
+  ) +
+  scale_color_manual(values = site_colors) +
+  scale_x_log10() +
+  scale_y_log10() +
+  geom_abline(slope = 1, intercept = log10(0.1),
+              linetype = "dashed", color = "black", linewidth = 0.8) +
+  labs(
+    title = "Flow Difference vs. Instantaneous Flow (all points)",
+    x     = "Instantaneous Flow (cfs, log10 scale)",
+    y     = "Flow Difference (cfs, log10 scale)"
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(
+    legend.title    = element_blank(),
+    legend.text     = element_text(size = 14),
+    legend.key.size = unit(1.5, "cm")
+  )
+
+# Locating hydropeaking event
+sample_events <- flow_all_15min %>%
+  filter(above_10pct == "TRUE") %>%
+  arrange(desc(frac_change)) %>%
+  slice(1:10)  # top 10 biggest jumps
+
+sample_events %>% select(site, dateTime, Flow_Inst, flow_diff, frac_change)
+
+plot_event_window <- function(df, event_time, site_name, before = 36, after = 36) {
+  
+  site_data <- df %>% filter(site == site_name) %>% arrange(dateTime)
+  
+  # Find the index of the event
+  event_idx <- which(site_data$dateTime == event_time)
+  
+  # Grab the window
+  window <- site_data %>%
+    slice((event_idx - before):(event_idx + after)) %>%
+    mutate(is_event = dateTime == event_time)
+  
+  ggplot(window, aes(x = dateTime, y = Flow_Inst)) +
+    geom_line(linewidth = 0.8) +
+    geom_point(aes(color = is_event), size = 3) +
+    scale_color_manual(values = c("FALSE" = "grey40", "TRUE" = "red")) +
+    labs(
+      title = paste0(site_name, ": Event at ", event_time),
+      subtitle = paste0("Window: ", before*15, " min before to ", after*15, " min after"),
+      x = "Time",
+      y = "Discharge (cfs)"
+    ) +
+    theme_minimal(base_size = 13) +
+    theme(legend.position = "none")
+}
+
+# Plot the top event
+plot_event_window(flow_all_15min, 
+                  event_time = sample_events$dateTime[8],
+                  site_name  = sample_events$site[8])
+
+plot_event_window(flow_all_15min,
+                  event_time = as.POSIXct("2007-08-15 17:00:00", tz = "UTC"),
+                  site_name  = "Barnum",
+                  before = 96,   # 24 hours before
+                  after  = 96)   # 24 hours after
+
+plot_event_window(flow_all_15min,
+                  event_time = as.POSIXct("2019-06-04 15:15:00", tz = "UTC"),
+                  site_name  = "Barnum",
+                  before = 96,
+                  after  = 96)
+
+plot_event_window(flow_all_15min,
+                  event_time = as.POSIXct("2007-08-15 17:00:00", tz = "UTC"),
+                  site_name  = "Barnum",
+                  before = 672,   # 1 week before
+                  after  = 672)   # 1 week after

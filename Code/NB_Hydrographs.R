@@ -2,6 +2,7 @@ library(dplyr)
 library(tidyr)
 library(ggplot2)
 library(gridExtra)
+library(scales)
 
 flows_Kitzmiller <- read.csv("https://raw.githubusercontent.com/benhdye/NBPotomac/refs/heads/main/CSVs/flows_Kitzmiller.csv")
 
@@ -137,4 +138,27 @@ p <- ggplot(flows_all,
    theme_minimal()
  
  grid.arrange(p1, p2, p3, ncol = 1)
+ 
+ #log scale
+ 
+ p_log <- ggplot(flows_all,
+                 aes(x = dateTime,
+                     y = Flow_Inst,
+                     color = Site)) +
+   geom_line(linewidth = 0.5, alpha = 0.6) +
+   scale_color_manual(values = colors) +
+   scale_y_log10(
+     labels = scales::comma,
+     breaks = c(10, 100, 1000, 10000, 100000)
+   ) +
+   labs(
+     title = "North Branch Potomac Hydrographs 2003–2025",
+     x     = "Time",
+     y     = "Discharge (CFS, log scale)",
+     color = "Site"
+   ) +
+   theme_minimal() +
+   theme(legend.position = "bottom")
+ 
+ p_log
  
