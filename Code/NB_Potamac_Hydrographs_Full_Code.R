@@ -61,14 +61,18 @@ library(lubridate)
 
 # #Pull data from .rds files to save time
 # 
-#saveRDS(flows_Barnum, "flows_Barnum.rds")
-flows_Barnum <- readRDS("flows_Barnum.rds")
+# #saveRDS(flows_Barnum, "flows_Barnum.rds")
+# flows_Barnum <- readRDS("flows_Barnum.rds")
+# 
+# #saveRDS(flows_Barton, "flows_Barton.rds")
+# flows_Barton <- readRDS("flows_Barton.rds")
+# 
+# #saveRDS(flows_Kitzmiller, "flows_Kitzmiller.rds")
+# flows_Kitzmiller <- readRDS("flows_Kitzmiller.rds")
 
-#saveRDS(flows_Barton, "flows_Barton.rds")
-flows_Barton <- readRDS("flows_Barton.rds")
-
-#saveRDS(flows_Kitzmiller, "flows_Kitzmiller.rds")
-flows_Kitzmiller <- readRDS("flows_Kitzmiller.rds")
+flows_Barnum <- read_csv("flows_Barnum.csv")
+flows_Barton <- read_csv("flows_Barton.csv")
+flows_Kitzmiller <- read_csv("flows_Kitzmiller.csv")
 
 #make hourly
 flows_Barnum <- flows_Barnum %>%
