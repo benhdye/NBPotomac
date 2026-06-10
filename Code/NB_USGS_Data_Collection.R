@@ -5,8 +5,6 @@ library(zoo)
 library(dataRetrieval)
 
 #pullintervaldata(instantaneousvalues)
-
-
 flows_Kitzmiller<-readNWISuv(
   siteNumbers="01595500",
   parameterCd="00060",
@@ -30,6 +28,29 @@ flows_Barton<-readNWISuv(
   endDate="2025-09-17"
   )%>%renameNWISColumns()%>%
   mutate(flow_diff=lead(Flow_Inst)-Flow_Inst)
+
+#Fix Date
+flows_Kitzmiller$dateTime <- as.POSIXct(
+  flows_Kitzmiller$dateTime,
+  format = "%Y-%m-%d %H:%M:%S",
+  tz = "UTC"
+)
+flows_Barton$dateTime <- as.POSIXct(
+  flows_Barton$dateTime,
+  format = "%Y-%m-%d %H:%M:%S",
+  tz = "UTC"
+)
+flows_Barnum$dateTime <- as.POSIXct(
+  flows_Barnum$dateTime,
+  format = "%Y-%m-%d %H:%M:%S",
+  tz = "UTC"
+)
+
+#Apply Site Tag
+flows_Kitzmiller$Site <- "Kitzmiller"
+flows_Barnum$Site     <- "Barnum"
+flows_Barton$Site     <- "Barton"
+
 
 #write as .csv files
 write.csv(flows_Kitzmiller, "flows_Kitzmiller.csv", row.names = FALSE)

@@ -3,17 +3,18 @@ library(tidyr)
 library(ggplot2)
 library(zoo)
 library(dataRetrieval)
+library(lubridate)
 
 
 # pull interval data (instantaneous values)
 
-
+# 
 # flows_Kitzmiller <- readNWISuv(
 #   siteNumbers = "01595500",
 #   parameterCd = "00060",
 #   startDate = "2003-10-01",
 #   endDate = "2025-09-17"
-# ) %>% renameNWISColumns() %>% 
+# ) %>% renameNWISColumns() %>%
 #   mutate(flow_diff = lead(Flow_Inst) - Flow_Inst)
 # 
 # flows_Barnum <- readNWISuv(
@@ -21,19 +22,45 @@ library(dataRetrieval)
 #   parameterCd = "00060",
 #   startDate = "2003-10-01",
 #   endDate = "2025-09-17"
-# ) %>% renameNWISColumns() %>% 
+# ) %>% renameNWISColumns() %>%
 #   mutate(flow_diff = lead(Flow_Inst) - Flow_Inst)
-#                                
+# 
 # flows_Barton <- readNWISuv(
 #   siteNumbers = "01596500",
 #   parameterCd = "00060",
 #   startDate = "2003-10-01",
 #   endDate = "2025-09-17"
-# ) %>% renameNWISColumns() %>% 
+# ) %>% renameNWISColumns() %>%
 #   mutate(flow_diff = lead(Flow_Inst) - Flow_Inst)
 
-#Pull data from .rds files to save time
+#Daily Flow
+# 
+# flows_Kitzmiller <- readNWISdv(
+#   siteNumbers = "01595500",
+#   parameterCd = "00060",
+#   startDate = "2003-10-01",
+#   endDate = "2025-09-17"
+# ) %>% renameNWISColumns() %>%
+#   mutate(flow_diff = lead(Flow) - Flow)
+# 
+# flows_Barnum <- readNWISuv(
+#   siteNumbers = "01595800",
+#   parameterCd = "00060",
+#   startDate = "2003-10-01",
+#   endDate = "2025-09-17"
+# ) %>% renameNWISColumns() %>%
+#   mutate(flow_diff = lead(Flow) - Flow)
+# 
+# flows_Barton <- readNWISuv(
+#   siteNumbers = "01596500",
+#   parameterCd = "00060",
+#   startDate = "2003-10-01",
+#   endDate = "2025-09-17"
+# ) %>% renameNWISColumns() %>%
+#   mutate(flow_diff = lead(Flow) - Flow)
 
+# #Pull data from .rds files to save time
+# 
 #saveRDS(flows_Barnum, "flows_Barnum.rds")
 flows_Barnum <- readRDS("flows_Barnum.rds")
 
@@ -42,6 +69,43 @@ flows_Barton <- readRDS("flows_Barton.rds")
 
 #saveRDS(flows_Kitzmiller, "flows_Kitzmiller.rds")
 flows_Kitzmiller <- readRDS("flows_Kitzmiller.rds")
+
+#make hourly
+flows_Barnum <- flows_Barnum %>%
+  mutate(
+    dateTime = parse_date_time(dateTime, 
+                               orders = c("ymd_HMS", "ymd_HM", "mdy_HMS", "ymd")),
+    hour = round_date(dateTime, unit = "hour")
+  )
+
+flows_Barnum_15min <- flows_Barnum %>%
+  group_by(hour) %>%
+  slice_min(abs(dateTime - hour), n = 1) %>%
+  ungroup()
+
+flows_Barton <- flows_Barton %>%
+  mutate(
+    dateTime = parse_date_time(dateTime, 
+                               orders = c("ymd_HMS", "ymd_HM", "mdy_HMS", "ymd")),
+    hour = round_date(dateTime, unit = "hour")
+  )
+
+flows_Barton_15min <- flows_Barton %>%
+  group_by(hour) %>%
+  slice_min(abs(dateTime - hour), n = 1) %>%
+  ungroup()
+
+flows_Kitzmiller <- flows_Kitzmiller %>%
+  mutate(
+    dateTime = parse_date_time(dateTime, 
+                               orders = c("ymd_HMS", "ymd_HM", "mdy_HMS", "ymd")),
+    hour = round_date(dateTime, unit = "hour")
+  )
+
+flows_Kitzmiller_15min <- flows_Kitzmiller %>%
+  group_by(hour) %>%
+  slice_min(abs(dateTime - hour), n = 1) %>%
+  ungroup()
 
 
 
@@ -63,12 +127,12 @@ line_data <- data.frame(
 
 # kitzmiller_p <- ggplot(data=flows_Kitzmiller, mapping = aes(y=flow_diff, x= Flow_Inst))+
 #   geom_point(color="red")+
-#   geom_line(data = line_data, aes(x = Flow_Inst, y = flow_diff), 
+#   geom_line(data = line_data, aes(x = Flow_Inst, y = flow_diff),
 #             color = "black", linetype = "solid", linewidth = 1) +
 #   scale_x_log10() +
 #   scale_y_log10() +
 #   labs(title = "Kitzmiller cfs inst vs Difference 2003-2025")+xlab("low Instananous")+ylab("Flow Difference")
-# 
+
 # barnum_p <- ggplot(data=flows_Barnum, mapping = aes(y=flow_diff, x= Flow_Inst))+
 #   geom_point(color="blue")+
 #   geom_line(data = line_data, aes(x = Flow_Inst, y = flow_diff), 
@@ -217,6 +281,7 @@ ggplot(flow_all_15min, aes(x = flow_diff, fill = site, color = site)) +
     x = "Flow Difference (cfs, log10 scale)",
     y = "Density"
   )
+
 
 flows_Barnum_15min <- flows_Barnum_15min %>%
   mutate(
@@ -648,12 +713,12 @@ ggplot(excursions_norm, aes(x = frac_change, color = site, fill = site)) +
   geom_density(alpha = 0.25) +
   geom_vline(xintercept = 0.10, linetype = "dashed") +
   labs(
-    title = "PDF of Fractional Flow Increases (>10% events)",
+    title = "PDF of Fractional Flow Increases (>10% events) Hourly",
     x = "Fractional Change (flow_diff / Flow_Inst)",
     y = "Density"
   ) +  scale_x_log10()+
   theme_minimal(base_size = 13) +
-  theme(legend.title = element_blank())
+  theme(legend.title = element_blank())+ scale_y_continuous(limits = c(0, 4))
 
 
 #Seasonal cdf:
@@ -735,10 +800,10 @@ ggplot(
   labs(
     x = "Fractional Change (>10%)",
     y = "Density",
-    title = "PDF of Fractional Flow Increases During Spawning Season (Oct 15 – Nov 15)",
+    title = "PDF of Fractional Flow Increases During Spawning Season (Oct 15 – Nov 15) Hourly",
     color = "Site",
     fill = "Site"
-  )
+  )+ scale_y_continuous(limits = c(0, 4))
 
 # --- CDF of Fractional Change During Spawning Season (Linear) ---
 ggplot(
@@ -826,6 +891,7 @@ ggplot() +
 # Locating hydropeaking event
 sample_events <- flow_all_15min %>%
   filter(above_10pct == "TRUE") %>%
+  filter(site == "Barnum") %>% 
   arrange(desc(frac_change)) %>%
   slice(1:10)  # top 10 biggest jumps
 
@@ -857,10 +923,12 @@ plot_event_window <- function(df, event_time, site_name, before = 36, after = 36
     theme(legend.position = "none")
 }
 
-# Plot the top event
+event <- 5
+
+# Plot the event
 plot_event_window(flow_all_15min, 
-                  event_time = sample_events$dateTime[8],
-                  site_name  = sample_events$site[8])
+                  event_time = sample_events$dateTime[event],
+                  site_name  = sample_events$site[event])
 
 plot_event_window(flow_all_15min,
                   event_time = as.POSIXct("2007-08-15 17:00:00", tz = "UTC"),
@@ -879,3 +947,195 @@ plot_event_window(flow_all_15min,
                   site_name  = "Barnum",
                   before = 672,   # 1 week before
                   after  = 672)   # 1 week after
+#Better hydropeaking methods
+flow_all_15min <- flow_all_15min %>% 
+  arrange(site, dateTime) %>% 
+  group_by(site) %>% 
+  mutate(
+    # Rolling max over a window — if current value equals local max, it's a peak
+    roll_max = rollapply(Flow_Inst, width = 13, FUN = max, 
+                         fill = NA, align = "center"),
+    is_peak = Flow_Inst == roll_max,
+    
+    # Pre and post slopes around each peak
+    pre_slope  = Flow_Inst - lag(Flow_Inst, 6),   # rise over previous 90 min
+    post_slope = lead(Flow_Inst, 6) - Flow_Inst,  # fall over next 90 min
+    
+    asymmetry = pre_slope / abs(post_slope)
+  )
+
+hydropeak_candidates <- flow_all_15min |>
+  filter(
+    site == "Barnum",
+    is_peak == TRUE,
+    pre_slope > 0,        # was rising
+    post_slope < 0,       # then falling
+    asymmetry > 2         # rose faster than it fell
+  )
+
+
+hydropeak_candidates <- hydropeak_candidates |>
+  arrange(site, dateTime) |>
+  group_by(site) |>
+  mutate(
+    time_since_last = as.numeric(difftime(dateTime, lag(dateTime), units = "mins")),
+    new_event = is.na(time_since_last) | time_since_last > 180  # 3 hr gap = new event
+  ) |>
+  filter(new_event)  # keep only the first detection per cluster)
+
+#pdf
+pdf("hydropeak_review.pdf", width = 8, height = 4)
+
+for (i in seq_len(nrow(hydropeak_candidates))) {
+  
+  event     <- hydropeak_candidates[i, ]
+  site_data <- flow_all_15min |> filter(site == "Barnum")
+  
+  window_data <- site_data |>
+    filter(dateTime >= event$dateTime - 3*3600,
+           dateTime <= event$dateTime + 3*3600)
+  
+  p <- ggplot(window_data, aes(x = dateTime, y = Flow_Inst)) +
+    geom_line() +
+    geom_point(size = 1.5, color = "gray40") +
+    geom_point(data = event, color = "red", size = 3) +
+    labs(
+      title = paste0(event$site, ": Event at ", event$dateTime),
+      subtitle = paste0("Asymmetry: ", round(event$asymmetry, 2),
+                        "  |  Rise: ", round(event$pre_slope, 1), " cfs"),
+      x = "Time", y = "Discharge (cfs)"
+    ) +
+    theme_minimal()
+  
+  print(p)
+}
+
+dev.off()
+
+class(hydropeak_candidates$dateTime)
+class(flow_all_15min$dateTime)
+
+attr(hydropeak_candidates$dateTime, "tzone")
+attr(flow_all_15min$dateTime, "tzone")
+
+event <- hydropeak_candidates[1, ]
+flow_all_15min |>
+  filter(site == "Barnum",
+         dateTime >= event$dateTime - 3*3600,
+         dateTime <= event$dateTime + 3*3600) |>
+  nrow()
+
+head(flows_Barnum$dateTime)
+
+#Shiny App
+
+library(shiny)
+library(ggplot2)
+library(dplyr)
+
+# Initialize a labels column
+hydropeak_candidates$label <- NA_character_
+
+ui <- fluidPage(
+  titlePanel("Hydropeak Event Reviewer"),
+  fluidRow(
+    column(8, plotOutput("event_plot", height = "400px")),
+    column(4,
+           h4(textOutput("progress")),
+           verbatimTextOutput("event_info"),
+           br(),
+           actionButton("btn_hydropeak", "✓ Hydropeaking",  
+                        style = "color:white; background-color:#2196F3; width:100%; margin-bottom:8px"),
+           actionButton("btn_artifact",  "✗ Artifact/Dropout",
+                        style = "color:white; background-color:#f44336; width:100%; margin-bottom:8px"),
+           actionButton("btn_flood",     "~ Flood Pulse",
+                        style = "color:white; background-color:#4CAF50; width:100%; margin-bottom:8px"),
+           actionButton("btn_skip",      "? Skip",
+                        style = "width:100%; margin-bottom:8px"),
+           br(),
+           actionButton("btn_save", "💾 Save Progress")
+    )
+  )
+)
+
+server <- function(input, output, session) {
+  
+  idx     <- reactiveVal(1)
+  labels  <- reactiveVal(rep(NA_character_, nrow(hydropeak_candidates)))
+  
+  current_event <- reactive({
+    hydropeak_candidates[idx(), ]
+  })
+  
+  output$progress <- renderText({
+    paste0("Event ", idx(), " of ", nrow(hydropeak_candidates))
+  })
+  
+  output$event_info <- renderText({
+    e <- current_event()
+    paste0("Site: ", e$site, "\n",
+           "Time: ", e$dateTime, "\n",
+           "Peak Q: ", round(e$Flow_Inst, 1), " cfs\n",
+           "Asymmetry: ", round(e$asymmetry, 2), "\n",
+           "Rise: ", round(e$pre_slope, 1), " cfs/90min")
+  })
+  
+  output$event_plot <- renderPlot({
+    e <- current_event()
+    window_data <- flow_all_15min |>
+      filter(site == e$site,
+             dateTime >= e$dateTime - 3*3600,
+             dateTime <= e$dateTime + 3*3600)
+    
+    ggplot(window_data, aes(x = dateTime, y = Flow_Inst)) +
+      geom_line() +
+      geom_point(size = 1.5, color = "gray40") +
+      geom_point(data = e, aes(x = dateTime, y = Flow_Inst),
+                 color = "red", size = 3) +
+      labs(title = paste0(e$site, ": ", e$dateTime),
+           subtitle = paste0("Asymmetry: ", round(e$asymmetry, 2)),
+           x = "Time", y = "Discharge (cfs)") +
+      theme_minimal()
+  })
+  
+  # Button handlers
+  label_and_advance <- function(lbl) {
+    l <- labels()
+    l[idx()] <- lbl
+    labels(l)
+    if (idx() < nrow(hydropeak_candidates)) idx(idx() + 1)
+  }
+  
+  observeEvent(input$btn_hydropeak, label_and_advance("hydropeaking"))
+  observeEvent(input$btn_artifact,  label_and_advance("artifact"))
+  observeEvent(input$btn_flood,     label_and_advance("flood"))
+  observeEvent(input$btn_skip,      label_and_advance(NA_character_))
+  
+  observeEvent(input$btn_save, {
+    result <- hydropeak_candidates
+    result$label <- labels()
+    write.csv(result, "labeled_events.csv", row.names = FALSE)
+    showNotification("Saved to labeled_events.csv", type = "message")
+  })
+}
+
+shinyApp(ui, server)
+
+event_time <- as.POSIXct("2006-10-05 16:45:00", tz = "UTC")
+
+window_data <- flow_all_15min |>
+  filter(site == "Barnum",
+         dateTime >= event_time - 6*3600,
+         dateTime <= event_time + 6*3600)
+
+ggplot(window_data, aes(x = dateTime, y = Flow_Inst)) +
+  geom_line() +
+  geom_point(size = 1.5, color = "gray40") +
+  geom_point(data = window_data |> filter(dateTime == event_time),
+             color = "red", size = 3) +
+  labs(
+    title = "Barnum: 2006-10-05 16:45:00",
+    subtitle = "Window: 6 hours before and after",
+    x = "Time", y = "Discharge (cfs)"
+  ) +
+  theme_minimal()

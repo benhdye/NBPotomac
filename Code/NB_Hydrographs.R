@@ -4,36 +4,26 @@ library(ggplot2)
 library(gridExtra)
 library(scales)
 
-flows_Kitzmiller <- read.csv("https://raw.githubusercontent.com/benhdye/NBPotomac/refs/heads/main/CSVs/flows_Kitzmiller.csv")
+flows_Kitzmiller <- read.csv("https://raw.githubusercontent.com/benhdye/NBPotomac/refs/heads/main/flows_Kitzmiller.csv")
 
-flows_Barnum <- read.csv("https://raw.githubusercontent.com/benhdye/NBPotomac/refs/heads/main/CSVs/flows_Barnum.csv")
+flows_Barnum <- read.csv("https://raw.githubusercontent.com/benhdye/NBPotomac/refs/heads/main/flows_Barnum.csv")
 
-flows_Barton <- read.csv("https://raw.githubusercontent.com/benhdye/NBPotomac/refs/heads/main/CSVs/flows_Barton.csv")
+flows_Barton <- read.csv("https://raw.githubusercontent.com/benhdye/NBPotomac/refs/heads/main/flows_Barton.csv")
 
-flows_Kitzmiller$dateTime <- as.POSIXct(
-  flows_Kitzmiller$dateTime,
-  format = "%Y-%m-%d %H:%M:%S",
-  tz = "UTC"
-)
-flows_Barton$dateTime <- as.POSIXct(
-  flows_Barton$dateTime,
-  format = "%Y-%m-%d %H:%M:%S",
-  tz = "UTC"
-)
-flows_Barnum$dateTime <- as.POSIXct(
-  flows_Barnum$dateTime,
-  format = "%Y-%m-%d %H:%M:%S",
-  tz = "UTC"
-)
-
-flows_Kitzmiller$Site <- "Kitzmiller"
-flows_Barnum$Site     <- "Barnum"
-flows_Barton$Site     <- "Barton"
+flows_Kitzmiller$dateTime <- as.POSIXct(flows_Kitzmiller$dateTime, format = "%Y-%m-%d %H:%M:%S", tz = "UTC")
+flows_Barnum$dateTime     <- as.POSIXct(flows_Barnum$dateTime,     format = "%Y-%m-%d %H:%M:%S", tz = "UTC")
+flows_Barton$dateTime     <- as.POSIXct(flows_Barton$dateTime,     format = "%Y-%m-%d %H:%M:%S", tz = "UTC")
 
 flows_all <- bind_rows(
   flows_Kitzmiller,
   flows_Barnum,
   flows_Barton
+)
+
+flows_all$dateTime <- as.POSIXct(
+  flows_all$dateTime,
+  format = "%Y-%m-%d %H:%M:%S",
+  tz = "UTC"
 )
 
 colors <- c(
@@ -42,11 +32,6 @@ colors <- c(
   "Barton"     = "#5E8C61"   
 )
 
-flows_all$dateTime <- as.POSIXct(
-  flows_all$dateTime,
-  format = "%Y-%m-%d %H:%M:%S",
-  tz = "UTC"
-)
 
 p <- ggplot(flows_all,
             aes(x = dateTime,
@@ -107,8 +92,7 @@ p <- ggplot(flows_all,
    flows_Barton$Flow_Inst,
    na.rm = TRUE
  )
- 
- coord_cartesian(ylim = c(y_min, y_max))
+
  
  p1 <- ggplot(flows_Kitzmiller,
               aes(x = dateTime, y = Flow_Inst)) +
