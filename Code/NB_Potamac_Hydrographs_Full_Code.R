@@ -623,10 +623,10 @@ ggplot(flow_all_15min %>%
 
 #Normalizing x-axis
 
-excursions_norm <- high_flows_10pct %>%
+high_flows_norm <- high_flows_10pct %>%
   mutate(norm_change = flow_diff / Flow_Inst)
 
-ggplot(excursions_norm, aes(x = Flow_Inst, y = norm_change,
+ggplot(high_flows_norm, aes(x = Flow_Inst, y = norm_change,
                             color = site, fill = site)) +
   geom_point(alpha = 0.4) +
   geom_hline(yintercept = 0.10, linetype = "dashed") +  # flattened 10% line
@@ -639,7 +639,7 @@ ggplot(excursions_norm, aes(x = Flow_Inst, y = norm_change,
   theme_minimal(base_size = 13) +
   theme(legend.title = element_blank())
 
-ggplot(excursions_norm, aes(x = norm_change, color = site, fill = site)) +
+ggplot(high_flows_norm, aes(x = norm_change, color = site, fill = site)) +
   geom_density(alpha = 0.25) +
   geom_vline(data = medians, aes(xintercept = med_flow, color = site), linetype = "dashed") +
   labs(
@@ -650,7 +650,7 @@ ggplot(excursions_norm, aes(x = norm_change, color = site, fill = site)) +
   theme_minimal(base_size = 13) +
   theme(legend.title = element_blank())
 
-ggplot(excursions_norm, aes(x = norm_change, color = site, fill = site)) +
+ggplot(high_flows_norm, aes(x = norm_change, color = site, fill = site)) +
   geom_density(alpha = 0.25) +
   geom_vline(data = medians, aes(xintercept = med_flow, color = site), linetype = "dashed") +
   scale_x_log10() +
@@ -662,10 +662,10 @@ ggplot(excursions_norm, aes(x = norm_change, color = site, fill = site)) +
   theme_minimal(base_size = 13) +
   theme(legend.title = element_blank())
 
-excursions_norm <- excursions_norm %>%
+high_flows_norm <- high_flows_norm %>%
   mutate(norm_change_adj = norm_change + 1e-6)
 
-ggplot(excursions_norm, aes(x = norm_change_adj, color = site, fill = site)) +
+ggplot(high_flows_norm, aes(x = norm_change_adj, color = site, fill = site)) +
   geom_density(alpha = 0.25) +
   scale_x_log10() +
   labs(
@@ -710,10 +710,10 @@ library(patchwork)
 plot_barnum / plot_kitzmiller / plot_barton
 
 #PDF of Fractional Change
-excursions_norm <- high_flows_10pct %>%
+high_flows_norm <- high_flows_10pct %>%
   mutate(frac_change = flow_diff / Flow_Inst)
 
-ggplot(excursions_norm, aes(x = frac_change, color = site, fill = site)) +
+ggplot(high_flows_norm, aes(x = frac_change, color = site, fill = site)) +
   geom_density(alpha = 0.25) +
   geom_vline(xintercept = 0.10, linetype = "dashed") +
   labs(
@@ -782,7 +782,7 @@ ggplot(
 # --- Spawning Season Analysis (Mid-Oct to Mid-Nov) ---
 
 # Filter for spawning window: Oct 15 – Nov 15
-spawning_excursions <- high_flows_10pct %>%
+spawning_high_flows <- high_flows_10pct %>%
   mutate(dateTime = parse_date_time(dateTime,
                                     orders = c("ymd HMS", "ymd"),
                                     tz = "UTC")) %>%
@@ -793,7 +793,7 @@ spawning_excursions <- high_flows_10pct %>%
 
 # --- PDF of Fractional Change During Spawning Season ---
 ggplot(
-  spawning_excursions %>%
+  spawning_high_flows %>%
     filter(site %in% c("Kitzmiller", "Barnum", "Barton")),
   aes(x = frac_change, color = site, fill = site)
 ) +
@@ -811,7 +811,7 @@ ggplot(
 
 # --- CDF of Fractional Change During Spawning Season (Linear) ---
 ggplot(
-  spawning_excursions %>%
+  spawning_high_flows %>%
     filter(site %in% c("Kitzmiller", "Barnum", "Barton")),
   aes(x = frac_change, color = site)
 ) +
@@ -827,7 +827,7 @@ ggplot(
 
 # --- CDF of Fractional Change During Spawning Season (Log Scale) ---
 ggplot(
-  spawning_excursions %>%
+  spawning_high_flows %>%
     filter(site %in% c("Kitzmiller", "Barnum", "Barton")),
   aes(x = frac_change, color = site)
 ) +
@@ -841,8 +841,8 @@ ggplot(
     color = "Site"
   )
 
-# --- Quick summary of spawning excursion counts per site ---
-spawning_excursions %>%
+# --- Quick summary of spawning high_flow counts per site ---
+spawning_high_flows %>%
   group_by(site) %>%
   summarise(
     n = n(),

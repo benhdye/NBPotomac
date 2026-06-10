@@ -1,9 +1,9 @@
 #Calculate Fractional Changes
 
 #Source
-flows_Barnum <- read_csv("https://raw.githubusercontent.com/benhdye/NBPotomac/refs/heads/main/CSVs/flows_Barnum_15min.csv")
-flows_Barton <- read_csv("https://raw.githubusercontent.com/benhdye/NBPotomac/refs/heads/main/CSVs/flows_Barton_15min.csv")
-flows_Kitzmiller <- read_csv("https://raw.githubusercontent.com/benhdye/NBPotomac/refs/heads/main/CSVs/flows_Kitzmiller_15min.csv")
+flows_Barnum_15min <- read.csv("https://raw.githubusercontent.com/benhdye/NBPotomac/refs/heads/main/CSVs/flows_Barnum_15min.csv")
+flows_Barton_15min <- read.csv("https://raw.githubusercontent.com/benhdye/NBPotomac/refs/heads/main/CSVs/flows_Barton_15min.csv")
+flows_Kitzmiller_15min <- read.csv("https://raw.githubusercontent.com/benhdye/NBPotomac/refs/heads/main/CSVs/flows_Kitzmiller_15min.csv")
 
 # Calculate Fractional Change
 flows_Barton_15min <- flows_Barton_15min %>%
