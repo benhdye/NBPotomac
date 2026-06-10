@@ -1,3 +1,5 @@
+library(dplyr)
+library(tidyverse)
 
 flows_Barnum <- read_csv("https://raw.githubusercontent.com/benhdye/NBPotomac/refs/heads/main/CSVs/flows_Barnum.csv")
 flows_Barton <- read_csv("https://raw.githubusercontent.com/benhdye/NBPotomac/refs/heads/main/CSVs/flows_Barton.csv")

@@ -331,21 +331,21 @@ ggplot(flow_all_15min, aes(x = frac_change, fill = site, color = site)) +
 
 
 # 10% flows
-excursions_10pct <- flow_all_15min %>%
+high_flows_10pct <- flow_all_15min %>%
   filter(frac_change > 0.10) %>%
   drop_na(frac_change, Flow_Inst)
-summary(excursions_10pct)
-table(excursions_10pct$site)# Filter for flow increases greater than 10%
+summary(high_flows_10pct)
+table(high_flows_10pct$site)# Filter for flow increases greater than 10%
 
 
 
 # --- Overlapping PDF for >10% flow increases ---
 
-medians <- excursions_10pct %>%
+medians <- high_flows_10pct %>%
   group_by(site) %>%
   summarize(med_flow = median(Flow_Inst, na.rm = TRUE))
 
-ggplot(excursions_10pct, aes(x = Flow_Inst, color = site, fill = site)) +
+ggplot(high_flows_10pct, aes(x = Flow_Inst, color = site, fill = site)) +
   geom_density(alpha = 0.25) +
   geom_vline(data = medians, aes(xintercept = med_flow, color = site), linetype = "dashed") +
   scale_x_log10() +
@@ -359,12 +359,12 @@ ggplot(excursions_10pct, aes(x = Flow_Inst, color = site, fill = site)) +
 
 #convert to m^3/s
 
-excursions_10pct <- excursions_10pct %>%
+high_flows_10pct <- high_flows_10pct %>%
   mutate(
     Flow_Inst_m3s = Flow_Inst * 0.0283168,
     flow_diff_m3s = flow_diff * 0.0283168
   )
-ggplot(excursions_10pct, 
+ggplot(high_flows_10pct, 
        aes(x = Flow_Inst_m3s, y = flow_diff_m3s, color = site)) +
   geom_point(alpha = 0.4) +
   scale_x_log10() +
@@ -378,7 +378,7 @@ ggplot(excursions_10pct,
   theme(legend.title = element_blank())
 
 
-ggplot(excursions_10pct, aes(x = Flow_Inst, y = flow_diff, color = site)) +
+ggplot(high_flows_10pct, aes(x = Flow_Inst, y = flow_diff, color = site)) +
   geom_point(alpha = 0.4) +
   scale_x_log10() +
   scale_y_log10() +
@@ -400,7 +400,7 @@ flow_ranges <- list(
 # Function to create a plot for each site, with color argument
 plot_slice <- function(site_name, flow_min, flow_max, pt_color = "black") {
   ggplot(
-    excursions_10pct %>%
+    high_flows_10pct %>%
       filter(site == site_name,
              Flow_Inst >= flow_min,
              Flow_Inst <= flow_max),
@@ -507,7 +507,7 @@ ggplot(flow_all_15min, aes(x = frac_change)) +
     caption = "Red dashed line = 10% threshold"
   )
 
-excursions_10pct %>%
+high_flows_10pct %>%
   group_by(site) %>%
   summarise(min = min(frac_change),
             q25 = quantile(frac_change, 0.25),
@@ -517,7 +517,7 @@ excursions_10pct %>%
             max = max(frac_change))
 
 
-site_limits <- excursions_10pct %>%
+site_limits <- high_flows_10pct %>%
   group_by(site) %>%
   summarise(
     xmin = min(frac_change),
@@ -525,7 +525,7 @@ site_limits <- excursions_10pct %>%
   )
 
 # Kitzmiller
-ggplot(filter(excursions_10pct, site == "Kitzmiller"), aes(x = frac_change)) +
+ggplot(filter(high_flows_10pct, site == "Kitzmiller"), aes(x = frac_change)) +
   stat_ecdf(color = "blue", size = 1) +
   coord_cartesian(xlim = c(0.1, 0.6)) +
   theme_minimal() +
@@ -536,7 +536,7 @@ ggplot(filter(excursions_10pct, site == "Kitzmiller"), aes(x = frac_change)) +
   )
 
 # Barnum
-ggplot(filter(excursions_10pct, site == "Barnum"), aes(x = frac_change)) +
+ggplot(filter(high_flows_10pct, site == "Barnum"), aes(x = frac_change)) +
   stat_ecdf(color = "red", size = 1) +
   coord_cartesian(xlim = c(0.1, 0.6)) +
   theme_minimal() +
@@ -547,7 +547,7 @@ ggplot(filter(excursions_10pct, site == "Barnum"), aes(x = frac_change)) +
   )
 
 # Barton
-ggplot(filter(excursions_10pct, site == "Barton"), aes(x = frac_change)) +
+ggplot(filter(high_flows_10pct, site == "Barton"), aes(x = frac_change)) +
   stat_ecdf(color = "darkgreen", size = 1) +
   coord_cartesian(xlim = c(0.1, 0.3)) +
   theme_minimal() +
@@ -560,7 +560,7 @@ ggplot(filter(excursions_10pct, site == "Barton"), aes(x = frac_change)) +
 
 #CDF of All
 ggplot(
-  excursions_10pct %>% 
+  high_flows_10pct %>% 
     filter(site %in% c("Kitzmiller", "Barnum", "Barton")),
   aes(x = frac_change, color = site)
 ) +
@@ -576,7 +576,7 @@ ggplot(
 
 #Log CDF
 ggplot(
-  excursions_10pct %>% 
+  high_flows_10pct %>% 
     filter(site %in% c("Kitzmiller", "Barnum", "Barton")),
   aes(x = frac_change, color = site)
 ) +
@@ -623,7 +623,7 @@ ggplot(flow_all_15min %>%
 
 #Normalizing x-axis
 
-excursions_norm <- excursions_10pct %>%
+excursions_norm <- high_flows_10pct %>%
   mutate(norm_change = flow_diff / Flow_Inst)
 
 ggplot(excursions_norm, aes(x = Flow_Inst, y = norm_change,
@@ -677,7 +677,7 @@ ggplot(excursions_norm, aes(x = norm_change_adj, color = site, fill = site)) +
 
 plot_slice_norm <- function(site_name, flow_min, flow_max, pt_color = "black") {
   
-  excursions_10pct %>%
+  high_flows_10pct %>%
     filter(site == site_name,
            Flow_Inst >= flow_min,
            Flow_Inst <= flow_max) %>%
@@ -710,7 +710,7 @@ library(patchwork)
 plot_barnum / plot_kitzmiller / plot_barton
 
 #PDF of Fractional Change
-excursions_norm <- excursions_10pct %>%
+excursions_norm <- high_flows_10pct %>%
   mutate(frac_change = flow_diff / Flow_Inst)
 
 ggplot(excursions_norm, aes(x = frac_change, color = site, fill = site)) +
@@ -728,12 +728,12 @@ ggplot(excursions_norm, aes(x = frac_change, color = site, fill = site)) +
 #Seasonal cdf:
 library(lubridate)
 
-excursions_10pct <- excursions_10pct %>%
+high_flows_10pct <- high_flows_10pct %>%
   mutate(dateTime = parse_date_time(dateTime,
                                     orders = c("ymd HMS", "ymd"),
                                     tz = "UTC"))
 
-excursions_10pct <- excursions_10pct %>%
+high_flows_10pct <- high_flows_10pct %>%
   mutate(
     season = case_when(
       month(dateTime) %in% c(12, 1, 2)  ~ "Winter",
@@ -747,7 +747,7 @@ excursions_10pct <- excursions_10pct %>%
 
 
 ggplot(
-  excursions_10pct %>% 
+  high_flows_10pct %>% 
     filter(site %in% c("Kitzmiller", "Barnum", "Barton")),
   aes(x = frac_change, color = site)
 ) +
@@ -764,7 +764,7 @@ ggplot(
 
 
 ggplot(
-  excursions_10pct %>% 
+  high_flows_10pct %>% 
     filter(site %in% c("Kitzmiller", "Barnum", "Barton")),
   aes(x = frac_change, color = site)
 ) +
@@ -782,7 +782,7 @@ ggplot(
 # --- Spawning Season Analysis (Mid-Oct to Mid-Nov) ---
 
 # Filter for spawning window: Oct 15 – Nov 15
-spawning_excursions <- excursions_10pct %>%
+spawning_excursions <- high_flows_10pct %>%
   mutate(dateTime = parse_date_time(dateTime,
                                     orders = c("ymd HMS", "ymd"),
                                     tz = "UTC")) %>%
