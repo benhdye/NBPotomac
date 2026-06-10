@@ -32,4 +32,5 @@ flows_Barton_15min     <- filter_15min_intervals(flows_Barton)
 write.csv(flows_Kitzmiller_15min, "flows_Kitzmiller_15min.csv", row.names = FALSE)
 write.csv(flows_Barton_15min, "flows_Barton_15min.csv", row.names = FALSE)
 write.csv(flows_Barnum_15min, "flows_Barnum_15min.csv", row.names = FALSE)
+write.csv(flow_all_15min, "flows_all_15min.csv", row.names = FALSE)
 
