@@ -10,4 +10,4 @@ high_flows_10pct <- flow_all_15min %>%
 summary(high_flows_10pct)
 table(high_flows_10pct$site)# Filter for flow increases greater than 10%
 
-write.csv(write.csv(high_flows_10pct, "high_flows_10pct", row.names = FALSE))
+write.csv(high_flows_10pct, "high_flows_10pct.csv", row.names = FALSE)
