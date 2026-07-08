@@ -59,9 +59,9 @@ plot_slice <- function(site_name, flow_min, flow_max, pt_color = "black") {
 }
 
 # Generate individual plots
-plot_kitzmiller <- plot_slice("Kitzmiller", 253.760, 1691.73, pt_color = "blue")
-plot_barnum      <- plot_slice("Barnum", 300, 2000, pt_color = "red")
-plot_barton      <- plot_slice("Barton", 55.376, 369.173, pt_color = "green")
+plot_kitzmiller <- plot_slice("Kitzmiller", 253.760, 1691.73, pt_color = "#6495ED")
+plot_barnum      <- plot_slice("Barnum", 300, 2000, pt_color = "#B23A48")
+plot_barton      <- plot_slice("Barton", 55.376, 369.173, pt_color = "#5E8C61")
 
 # Display them together
 library(patchwork)

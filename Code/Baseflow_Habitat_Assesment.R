@@ -2,19 +2,19 @@ library(grwat)
 library(dplyr)
 library(tidyr)
 
-flows_Barton_daily <- read.csv("https://raw.githubusercontent.com/benhdye/NBPotomac/refs/heads/main/CSVs/flows_Barton_daily.csv") %>% 
+flows_Barton_daily <- read.csv("https://media.githubusercontent.com/media/benhdye/NBPotomac/refs/heads/main/CSVs/flows_Barton_daily.csv") %>% 
   rename(
     Date = Date,
     Flow = X_00060_00003
   )
 
-flows_Barnum_daily <- read.csv("https://raw.githubusercontent.com/benhdye/NBPotomac/refs/heads/main/CSVs/flows_Barnum_daily.csv") %>% 
+flows_Barnum_daily <- read.csv("https://media.githubusercontent.com/media/benhdye/NBPotomac/refs/heads/main/CSVs/flows_Barnum_daily.csv") %>% 
   rename(
     Date = Date,
     Flow = X_00060_00003
   )
 
-flows_Kitzmiller_daily <- read.csv("https://raw.githubusercontent.com/benhdye/NBPotomac/refs/heads/main/CSVs/flows_Kitzmiller_daily.csv") %>% 
+flows_Kitzmiller_daily <- read.csv("https://media.githubusercontent.com/media/benhdye/NBPotomac/refs/heads/main/CSVs/flows_Kitzmiller_daily.csv") %>% 
   rename(
     Date = Date,
     Flow = X_00060_00003
@@ -64,17 +64,17 @@ Barnum_annual_flow <- flows_Barnum_daily %>%
 
 bf_Kitzmiller <- gr_baseflow(
   Q = flows_Kitzmiller_daily$Flow,
-  method = "Eckhardt",
+  method = "lynehollick ",
 )
 
 bf_Barnum <- gr_baseflow(
   Q = flows_Barnum_daily$Flow,
-  method = "Eckhardt",
+  method = "lynehollick ",
 )
 
 bf_Barton <- gr_baseflow(
   Q = flows_Barton_daily$Flow,
-  method = "Eckhardt",
+  method = "lynehollick ",
 )
 
 #attach to DF

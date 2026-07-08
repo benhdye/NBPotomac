@@ -696,15 +696,20 @@ plot_slice_norm <- function(site_name, flow_min, flow_max, pt_color = "black") {
     theme_minimal(base_size = 13)
 }
 
-plot_kitzmiller <- plot_slice_norm("Kitzmiller", 253.760, 1691.73, "blue") +
+plot_kitzmiller <- plot_slice_norm("Kitzmiller", 253.760, 1691.73, "#6495ED") +
   coord_cartesian(ylim = c(0, 2))
 
-plot_barnum <- plot_slice_norm("Barnum", 300, 2000, "red") +
+plot_barnum <- plot_slice_norm("Barnum", 300, 2000, "#B23A48") +
   coord_cartesian(ylim = c(0, 2))
 
-plot_barton <- plot_slice_norm("Barton", 55.376, 369.173, "green") +
+plot_barton <- plot_slice_norm("Barton", 55.376, 369.173, "#5E8C61") +
   coord_cartesian(ylim = c(0, 2))
 
+plot_kitzmiller
+
+plot_barnum
+
+plot_barton
 
 library(patchwork)
 plot_barnum / plot_kitzmiller / plot_barton
